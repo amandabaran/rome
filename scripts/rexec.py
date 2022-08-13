@@ -124,6 +124,10 @@ __utah__ = [
     "m510",
 ]
 
+__clem__ = [
+    "r6525",
+]
+
 __emulab__ = [
     "r320",
 ]
@@ -138,6 +142,8 @@ def build_hostname(nodetype, id):
         return id + ".utah.cloudlab.us"
     elif nodetype in __emulab__:
         return id + ".apt.emulab.net"
+    elif nodetype in __clem__:
+        return id + ".clemson.cloudlab.us"
     elif nodetype in __luigi__:
         return id + ".cse.lehigh.edu"
     else:

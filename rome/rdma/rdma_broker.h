@@ -81,7 +81,7 @@ class RdmaBroker {
   uint16_t port_;
 
   // Flag to indicate that the worker thread should terminate.
-  volatile bool terminate_;
+  std::atomic<bool> terminate_;
 
   // The working thread that listens and responds to incoming messages.
   struct thread_deleter {

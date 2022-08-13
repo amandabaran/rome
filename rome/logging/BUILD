@@ -1,6 +1,7 @@
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 
 levels = [
+    "auto",
     "off",
     "critical",
     "error",
@@ -12,8 +13,15 @@ levels = [
 
 string_flag(
     name = "log_level",
-    build_setting_default = "info",
+    build_setting_default = "auto",
     values = levels,
+)
+
+config_setting(
+    name = "auto",
+    flag_values = {
+        ":log_level": "auto",
+    },
 )
 
 config_setting(
@@ -68,7 +76,7 @@ config_setting(
 config_setting(
     name = "dbg",
     flag_values = {
-        ":log_level": "",
+        ":log_level": "auto",
     },
     values = {
         "compilation_mode": "dbg",
@@ -78,7 +86,7 @@ config_setting(
 config_setting(
     name = "fastbuild",
     flag_values = {
-        ":log_level": "",
+        ":log_level": "auto",
     },
     values = {
         "compilation_mode": "fastbuild",
@@ -88,7 +96,7 @@ config_setting(
 config_setting(
     name = "opt",
     flag_values = {
-        ":log_level": "",
+        ":log_level": "auto",
     },
     values = {
         "compilation_mode": "opt",

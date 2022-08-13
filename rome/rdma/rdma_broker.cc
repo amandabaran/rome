@@ -60,7 +60,8 @@ std::unique_ptr<RdmaBroker> RdmaBroker::Create(
   if (status.ok()) {
     return std::unique_ptr<RdmaBroker>(broker);
   } else {
-    ROME_ERROR(status.ToString());
+    ROME_ERROR("{}: {}:{}", status.ToString(), address.value_or(""),
+               port.value_or(-1));
     return nullptr;
   }
 }
