@@ -61,6 +61,7 @@ RdmaMemory::RdmaMemory(uint64_t capacity, std::optional<std::string_view> path,
         reinterpret_cast<uint8_t *>(std::aligned_alloc(64, bytes)));
     ROME_ASSERT(std::get<0>(raw_) != nullptr, "Allocation failed.");
   } else {
+    ROME_INFO("Using hugepages");
     raw_ = std::unique_ptr<uint8_t[], mmap_deleter>(reinterpret_cast<uint8_t *>(
         mmap(nullptr, capacity_, PROT_READ | PROT_WRITE,
              MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0)));
