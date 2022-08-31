@@ -4,7 +4,7 @@
 
 #include "absl/status/status.h"
 
-namespace rome {
+namespace rome::rdma {
 
 class RdmaAccessor {
  public:

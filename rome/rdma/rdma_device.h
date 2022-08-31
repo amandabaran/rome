@@ -11,7 +11,7 @@
 #include "rdma_util.h"
 #include "rome/logging/logging.h"
 
-namespace rome {
+namespace rome::rdma {
 
 // RAII.
 class RdmaDevice {

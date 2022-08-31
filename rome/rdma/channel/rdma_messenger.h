@@ -5,7 +5,7 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 
-namespace rome {
+namespace rome::rdma {
 
 // Contains a copy of a received message by a `RdmaChannel` for the caller of
 // `RdmaChannel::TryDeliver`.

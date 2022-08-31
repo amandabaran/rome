@@ -10,6 +10,8 @@
 #include <vector>
 
 #include "absl/status/statusor.h"
+#include "rome/logging/logging.h"
+#include "rome/util/distribution_util.h"
 #include "stream.h"
 
 namespace rome {
@@ -132,7 +134,7 @@ class MappedStream : public Stream<T> {
         new MappedStream(std::move(generator), std::move(streams)...));
   }
 
- private:
+ protected:
   MappedStream(
       std::function<absl::StatusOr<T>(const std::unique_ptr<Stream<U>> &...)>
           generator,
@@ -154,5 +156,6 @@ class NoOpStream : public Stream<NoOp> {
  private:
   absl::StatusOr<NoOp> NextInternal() { return NoOp{}; }
 };
+
 
 }  // namespace rome

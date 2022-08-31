@@ -5,7 +5,7 @@
 #include "rome/rdma/channel/rdma_accessor.h"
 #include "rome/rdma/rdma_util.h"
 
-namespace rome {
+namespace rome::rdma {
 
 class SyncRdmaAccessor : public RdmaAccessor {
  public:

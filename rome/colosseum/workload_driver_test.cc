@@ -8,7 +8,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "rome/colosseum/client_adaptor.h"
-#include "rome/colosseum/streams.h"
+#include "rome/colosseum/streams/streams.h"
 #include "rome/testutil/status_matcher.h"
 #include "rome/util/clocks.h"
 

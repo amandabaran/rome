@@ -8,6 +8,7 @@
 
 #include "absl/base/thread_annotations.h"
 #include "absl/status/status.h"
+#include "rome/util/thread_util.h"
 
 namespace util {
 

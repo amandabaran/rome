@@ -5,13 +5,14 @@
 
 #include "absl/status/status.h"
 
-#define VALUE_OR_DIE(status_or)             \
-  [&](const auto& s_or) {                   \
-    if (!(s_or).ok()) {                     \
-      ROME_FATAL(s_or.status().ToString()); \
-    }                                       \
-    return status_or.value();               \
-  }((status_or))
+#define VALUE_OR_DIE(status_or)                         \
+  [&](const auto& __s) __attribute__((always_inline)) { \
+    if (!(__s).ok()) {                                  \
+      ROME_FATAL(__s.status().ToString());              \
+    }                                                   \
+    return __s.value();                                 \
+  }                                                     \
+  ((status_or))
 
 namespace util {
 
@@ -45,6 +46,8 @@ using AlreadyExistsErrorBuilder =
 using FailedPreconditionErrorBuilder =
     StatusBuilder<absl::StatusCode::kFailedPrecondition>;
 using InternalErrorBuilder = StatusBuilder<absl::StatusCode::kInternal>;
+using InvalidArgumentErrorBuilder =
+    StatusBuilder<absl::StatusCode::kInvalidArgument>;
 using ResourceExhaustedErrorBuilder =
     StatusBuilder<absl::StatusCode::kResourceExhausted>;
 using AbortedErrorBuilder = StatusBuilder<absl::StatusCode::kAborted>;

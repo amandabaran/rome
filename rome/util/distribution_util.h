@@ -59,6 +59,7 @@
  *   int i = distribution(generator);
  * }
  */
+#pragma once
 
 #include <cassert>
 #include <cmath>

@@ -142,4 +142,5 @@ inline void __rome_init_log__() {
   }
 #else
 #define ROME_CHECK_DEBUG(...) ((void)0)
+#define ROME_ASSERT_DEBUG(...) ((void)0)
 #endif

@@ -37,7 +37,7 @@
 #include "rome/util/coroutine.h"
 #include "rome/util/status_util.h"
 
-namespace rome {
+namespace rome::rdma {
 
 using ::util::Coro;
 using ::util::InternalErrorBuilder;

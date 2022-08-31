@@ -4,7 +4,7 @@
 
 #include "absl/status/statusor.h"
 
-namespace rome {
+namespace rome::rdma {
 
 // Interface used by `RdmaBroker` to handle connection requests. Each of the
 // respective callbacks receives a pointer to the `rdma_cm_id` associated with
@@ -32,4 +32,4 @@ class RdmaReceiverInterface {
   virtual void OnDisconnect(rdma_cm_id* id) = 0;
 };
 
-}  // namespace rome
+}  // namespace rome::rdma

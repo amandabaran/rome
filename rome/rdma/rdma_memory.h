@@ -13,7 +13,7 @@
 #include "absl/status/statusor.h"
 #include "rdma_util.h"
 
-namespace rome {
+namespace rome::rdma {
 
 // Remotely accessible memory backed by either raw memory or hugepages (if
 // enabled). This is just a flat buffer that is preallocated. The user of this

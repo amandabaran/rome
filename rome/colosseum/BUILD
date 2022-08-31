@@ -1,32 +1,6 @@
 package(default_visibility = ["//rome:__subpackages__"])
 
 cc_library(
-    name = "stream",
-    hdrs = ["stream.h"],
-    deps = ["@absl//absl/status"],
-)
-
-cc_library(
-    name = "streams",
-    hdrs = ["streams.h"],
-    visibility = ["//visibility:public"],
-    deps = [":stream"],
-)
-
-cc_test(
-    name = "streams_test",
-    srcs = ["streams_test.cc"],
-    deps = [
-        ":streams",
-        "//rome/testutil:status_matcher",
-        "//rome/testutil:stream_matcher",
-        "@absl//absl/status:statusor",
-        "@gtest",
-        "@gtest//:gtest_main",
-    ],
-)
-
-cc_library(
     name = "qps_controller",
     hdrs = ["qps_controller.h"],
     visibility = ["//visibility:public"],
@@ -70,8 +44,8 @@ cc_test(
     deps = [
         ":client_adaptor",
         ":qps_controller",
-        ":streams",
         ":workload_driver",
+        "//rome/colosseum/streams",
         "//rome/testutil:status_matcher",
         "@absl//absl/status:statusor",
         "@gtest//:gtest_main",

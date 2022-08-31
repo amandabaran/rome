@@ -14,7 +14,7 @@ cc_library(
     name = "stream_matcher",
     hdrs = ["stream_matcher.h"],
     deps = [
-        "//rome/colosseum:stream",
+        "//rome/colosseum/streams:stream",
         "@absl//absl/strings",
         "@gtest",
     ],

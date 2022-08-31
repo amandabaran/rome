@@ -14,7 +14,7 @@
 #include "rome/rdma/rdma_memory.h"
 #include "rome/util/status_util.h"
 
-namespace rome {
+namespace rome::rdma {
 
 template <typename Messenger, typename Accessor>
 class RdmaChannel : public Messenger, Accessor {
@@ -49,6 +49,15 @@ class RdmaChannel : public Messenger, Accessor {
     }
   }
 
+  template <typename ProtoType>
+  absl::StatusOr<ProtoType> Deliver() {
+    auto p = this->TryDeliver<ProtoType>();
+    while (p.status().code() == absl::StatusCode::kUnavailable) {
+      p = this->TryDeliver<ProtoType>();
+    }
+    return p;
+  }
+
   absl::Status Post(ibv_send_wr* wr, ibv_send_wr** bad) {
     return this->PostInternal(wr, bad);
   }
@@ -58,4 +67,4 @@ class RdmaChannel : public Messenger, Accessor {
   rdma_cm_id* id_;  //! NOT OWNED
 };
 
-}  // namespace rome
+}  // namespace rome::rdma

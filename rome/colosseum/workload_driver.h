@@ -9,7 +9,7 @@
 #include "protos/colosseum.pb.h"
 #include "rome/colosseum/client_adaptor.h"
 #include "rome/colosseum/qps_controller.h"
-#include "rome/colosseum/stream.h"
+#include "rome/colosseum/streams/stream.h"
 #include "rome/metrics/counter.h"
 #include "rome/metrics/metric.h"
 #include "rome/metrics/stopwatch.h"
@@ -80,6 +80,7 @@ class WorkloadDriver {
                  QpsController* qps_controller,
                  std::chrono::milliseconds qps_sampling_rate)
       : terminated_(false),
+        running_(false),
         client_(std::move(client)),
         stream_(std::move(stream)),
         qps_controller_(qps_controller),
@@ -92,6 +93,7 @@ class WorkloadDriver {
         lat_summary_("sampled_lat", "ns", 1000) {}
 
   std::atomic<bool> terminated_;
+  std::atomic<bool> running_;
 
   std::unique_ptr<ClientAdaptor<OpType>> client_;
   std::unique_ptr<Stream<OpType>> stream_;
@@ -129,14 +131,13 @@ absl::Status WorkloadDriver<OpType>::Start() {
     return absl::UnavailableError(
         "Cannot restart a terminated workload driver.");
   }
-  auto client_status = client_->Start();
-  if (!client_status.ok()) return client_status;
 
-  stopwatch_ = metrics::Stopwatch::Create("driver_stopwatch");
   auto task =
       std::packaged_task<absl::Status()>(std::bind(&WorkloadDriver::Run, this));
   run_status_ = task.get_future();
   run_thread_ = std::make_unique<std::thread>(std::move(task));
+  while (!running_)
+    ;
   return absl::OkStatus();
 }
 
@@ -151,19 +152,17 @@ absl::Status WorkloadDriver<OpType>::Stop() {
   terminated_ = true;
   run_status_.wait();
 
-  // The client's `Stop` may block while there are any outstanding operations.
-  // After this call, it is assumed that the client is no longer active.
-  auto client_status = client_->Stop();
-  stopwatch_->Stop();
-
   if (!run_status_.get().ok()) return run_status_.get();
-  if (!client_status.ok()) return client_status;
   return absl::OkStatus();
 }
 
 template <typename OpType>
 absl::Status WorkloadDriver<OpType>::Run() {
-  absl::Status status = absl::OkStatus();
+  auto status = client_->Start();
+  if (!status.ok()) return status;
+  stopwatch_ = metrics::Stopwatch::Create("driver_stopwatch");
+  running_ = true;
+
   while (!terminated_) {
     if (qps_controller_ != nullptr) {
       qps_controller_->Wait();
@@ -182,18 +181,18 @@ absl::Status WorkloadDriver<OpType>::Run() {
         curr_lap.GetRuntimeNanoseconds());
 
     auto client_status = client_->Apply(next_op.value());
+    if (curr_lap_ms > lat_sampling_rate_) {
+      lat_summary_
+          << (stopwatch_->GetLapSplit().GetRuntimeNanoseconds().count() -
+              curr_lap.GetRuntimeNanoseconds().count());
+    }
+
     if (!client_status.ok()) {
       status = client_status;
       break;
     }
 
     ++ops_;
-
-    if (curr_lap_ms > lat_sampling_rate_) {
-      lat_summary_
-          << (stopwatch_->GetLapSplit().GetRuntimeNanoseconds().count() -
-              curr_lap.GetRuntimeNanoseconds().count());
-    }
 
     if (curr_lap_ms > qps_sampling_rate_) {
       auto curr_ops = ops_.GetCounter();
@@ -204,6 +203,9 @@ absl::Status WorkloadDriver<OpType>::Run() {
       prev_ops_ = curr_ops;
     }
   }
+  // The client's `Stop` may block while there are any outstanding operations.
+  // After this call, it is assumed that the client is no longer active.
+  status = client_->Stop();
   stopwatch_->Stop();
   return status;
 }

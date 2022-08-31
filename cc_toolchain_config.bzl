@@ -52,7 +52,7 @@ common_opt_flags = [
 ]
 
 common_linker_flags = [
-    "-lstdc++",
+    "-lc++",
     "-lm",
 ]
 
@@ -118,9 +118,7 @@ def _clang_impl(ctx):
                     actions = all_cpp_link_actions,
                     flag_groups = ([
                         flag_group(
-                            flags = common_linker_flags + [
-                                "-stdlib=libc++",
-                            ],
+                            common_linker_flags,
                         ),
                     ]),
                 ),
@@ -172,9 +170,7 @@ def _clang_impl(ctx):
                     actions = all_cpp_compile_actions,
                     flag_groups = ([
                         flag_group(
-                            flags = common_compile_flags + clang_compile_flags + [
-                                "-stdlib=libc++",
-                            ],
+                            flags = common_compile_flags + clang_compile_flags,
                         ),
                     ]),
                 ),

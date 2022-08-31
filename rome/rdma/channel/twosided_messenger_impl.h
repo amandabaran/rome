@@ -10,7 +10,7 @@
 #include "rome/rdma/rdma_util.h"
 #include "rome/util/status_util.h"
 
-namespace rome {
+namespace rome::rdma {
 
 using ::util::InternalErrorBuilder;
 using ::util::ResourceExhaustedErrorBuilder;

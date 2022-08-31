@@ -5,7 +5,7 @@ cc_binary(
         "//rome/colosseum:client_adaptor",
         "//rome/colosseum:qps_controller",
         "//rome/colosseum:workload_driver",
-        "//rome/colosseum:streams",
+        "//rome/colosseum/streams:streams",
         "//rome/metrics:summary",
         "@absl//absl/status:status",
         "@absl//absl/status:statusor",

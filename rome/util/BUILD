@@ -116,3 +116,9 @@ py_library(
     name = "debugpy_util",
     srcs = ["debugpy_util.py"],
 )
+
+cc_library(
+    name = "thread_util",
+    hdrs = ["thread_util.h"],
+    deps = [],
+)

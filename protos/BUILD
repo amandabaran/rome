@@ -36,6 +36,16 @@ py_proto_library(
 )
 
 proto_library(
+    name = "rdma_proto",
+    srcs = ["rdma.proto"],
+)
+
+cc_proto_library(
+    name = "rdma_cc_proto",
+    deps = [":rdma_proto"],
+)
+
+proto_library(
     name = "testutil_proto",
     srcs = ["testutil.proto"],
 )
