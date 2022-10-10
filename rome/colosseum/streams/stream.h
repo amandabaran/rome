@@ -23,8 +23,9 @@ inline bool IsStreamTerminated(const absl::Status &status) {
 // Calling `Next` on a stream of numbers returns the next value in the stream,
 // or `StreamTerminatedStatus`. If a user calls `Terminate` then all future
 // calls to next will produce `StreamTerminatedStatus`.
-template <typename T> class Stream {
-public:
+template <typename T>
+class Stream {
+ public:
   Stream() : terminated_(false) {}
   virtual ~Stream() = default;
 
@@ -32,7 +33,7 @@ public:
   Stream(const Stream &) = delete;
   Stream(Stream &&) = default;
 
-  absl::StatusOr<T> Next() {
+  absl::StatusOr<T> Next() __attribute__((always_inline)) {
     if (!terminated_) {
       return NextInternal();
     } else {
@@ -42,10 +43,10 @@ public:
 
   void Terminate() { terminated_ = true; }
 
-private:
-  virtual absl::StatusOr<T> NextInternal() = 0;
+ private:
+  virtual absl::StatusOr<T> NextInternal() __attribute__((always_inline)) = 0;
 
   bool terminated_;
 };
 
-} // namespace rome
+}  // namespace rome

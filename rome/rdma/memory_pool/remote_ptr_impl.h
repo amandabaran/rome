@@ -49,7 +49,7 @@ remote_ptr<T>::operator remote_ptr<U>() const {
 template <typename T>
 /* static */ constexpr typename remote_ptr<T>::element_type*
 remote_ptr<T>::to_address(const remote_ptr<T>& p) {
-  return (element_type*)p.address_;
+  return (element_type*)p.address();
 }
 
 template <typename T>

@@ -111,6 +111,9 @@ MemoryPool::DoorbellBatchBuilder::Build() {
   const int capcity = batch_->capacity();
   ROME_ASSERT(size > 0, "Cannot build an empty batch.");
   ROME_ASSERT(size == capcity, "Batch must be full");
+  for (int i = 0; i < size; ++i) {
+    batch_->wrs_[i].wr_id = batch_->wrs_[i].wr.rdma.remote_addr;
+  }
   return std::move(batch_);
 }
 
@@ -133,8 +136,6 @@ absl::Status MemoryPool::Init(uint32_t capacity,
   prev_ = alloc.allocate();
 
   for (const auto &p : peers) {
-    ROME_DEBUG("Connecting to: id={}, address={}, port={}", p.id, p.address,
-               p.port);
     auto connected = connection_manager_->Connect(p.id, p.address, p.port);
     while (absl::IsUnavailable(connected.status())) {
       connected = connection_manager_->Connect(p.id, p.address, p.port);
@@ -148,6 +149,7 @@ absl::Status MemoryPool::Init(uint32_t capacity,
   for (const auto &p : peers) {
     auto conn = VALUE_OR_DIE(connection_manager_->GetConnection(p.id));
     status = conn->channel()->Send(rm_proto);
+    ROME_CHECK_OK(ROME_RETURN(status), status);
   }
 
   for (const auto &p : peers) {
@@ -186,8 +188,10 @@ inline void MemoryPool::Execute(DoorbellBatch *batch) {
     if (batch->is_mortal() && *kill) return;
     cpu_relax();
   }
-  ROME_ASSERT(poll == 1 && wc.status == IBV_WC_SUCCESS, "ibv_poll_cq(): {} ",
-              (poll < 0 ? strerror(errno) : ibv_wc_status_str(wc.status)));
+  ROME_ASSERT(poll == 1 && wc.status == IBV_WC_SUCCESS,
+              "ibv_poll_cq(): {} (dest={})",
+              (poll < 0 ? strerror(errno) : ibv_wc_status_str(wc.status)),
+              remote_ptr<uint8_t>(wc.wr_id));
 }
 
 template <typename T>

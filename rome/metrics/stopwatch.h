@@ -8,6 +8,13 @@
 
 namespace rome::metrics {
 
+// All of these are KHz
+inline static constexpr char kTscFreqKhzFilePath[] =
+    "/sys/devices/system/cpu/cpu0/tsc_freq_khz";
+inline static constexpr char kMaxFreqFilePath[] =
+    "/sys/devices/system/cpu/cpu0/cpufreq/base_frequency";
+inline static constexpr int kDefaultCpuFreqKhz = 2300000;
+
 class Stopwatch : public Metric {
  public:
   // A split is used to measure a period of time. The period starts when the

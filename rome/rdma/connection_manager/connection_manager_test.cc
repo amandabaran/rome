@@ -120,7 +120,7 @@ TEST_F(ConnectionManagerTest, LoopbackTest) {
   // Test plan: Something...
   static constexpr int kId = 1;
   ConnectionManager<Channel> node(kId);
-  ASSERT_OK(node.Start("10.0.0.1", std::nullopt));
+  ASSERT_OK(node.Start(kAddress, std::nullopt));
   auto conn_or = Connect(&node, kId, node.address(), node.port());
   EXPECT_OK(conn_or);
   conn_or = node.GetConnection(kId);

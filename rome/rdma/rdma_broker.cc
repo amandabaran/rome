@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <cstring>
 #include <experimental/coroutine>
+#include <ratio>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -142,6 +143,7 @@ Coro RdmaBroker::HandleConnectionRequests() {
   int ret;
   while (true) {
     do {
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
       // If we are shutting down, and there are no connections left then we
       // should finish.
       if (terminate_) co_return;
@@ -217,4 +219,4 @@ void RdmaBroker::Run() {
   ROME_TRACE("Finished: {}", status_.ok() ? "Ok" : status_.message());
 }
 
-}  // namespace rome
+}  // namespace rome::rdma

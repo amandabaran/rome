@@ -77,19 +77,15 @@ struct YcsbOp {
 // range. Notably, we choose an upper bound 2x larger than the provided one to
 // ensure that the keys are not too clustered (this is a limitation but seems to
 // work decently well in practice).
-template <typename T>
-class YcsbZipfianDistribution : public Stream<T> {
+template <typename T, typename D, typename... Args>
+class YcsbKeyGenerator : public Stream<T> {
  public:
-  YcsbZipfianDistribution(uint64_t lo, uint64_t hi, double theta)
-      : mt_(rd_()),
-        zipf_(lo, hi * 2, theta),
-        uniform_(lo, hi * 2),
-        hi_(hi),
-        lo_(lo) {}
+  YcsbKeyGenerator(uint64_t lo, uint64_t hi, Args... args)
+      : mt_(9272), dist_(lo, hi, args...), hi_(hi), lo_(lo) {}
 
  private:
   absl::StatusOr<T> NextInternal() override {
-    auto v = zipf_(mt_);
+    auto v = dist_(mt_);
     // auto v = uniform_(mt_);
     uint64_t hash = fnv_offset_basis_;
     hash *= fnv_prime_;
@@ -113,8 +109,9 @@ class YcsbZipfianDistribution : public Stream<T> {
 
   std::random_device rd_;
   std::mt19937 mt_;
-  rome::zipfian_int_distribution<uint64_t> zipf_;
-  std::uniform_int_distribution<> uniform_;
+  D dist_;
+  // rome::zipfian_int_distribution<uint64_t> zipf_;
+  // std::uniform_int_distribution<> uniform_;
 
   const T hi_;
   const T lo_;
@@ -123,15 +120,12 @@ class YcsbZipfianDistribution : public Stream<T> {
   static constexpr uint64_t fnv_offset_basis_ = 0xcbf29ce484222325;
 };
 
-template <typename T>
+template <typename T, typename D, typename... Args>
 class YcsbStreamFactory : public Stream<T> {
   using op_type = typename YcsbOp<T>::Type;
   using key_type = T;
 
   static_assert(std::is_integral_v<key_type>);
-  using ZipfianStream =
-      RandomDistributionStream<rome::zipfian_int_distribution<key_type>,
-                               key_type, key_type, double>;
 
   static constexpr double kDefaultTheta = 0.99;
 
@@ -143,10 +137,9 @@ class YcsbStreamFactory : public Stream<T> {
 
  public:
   static std::unique_ptr<YcsbAStream> YcsbA(const key_type &lo,
-                                            const key_type &hi,
-                                            double theta = kDefaultTheta) {
-    auto key_stream =
-        std::make_unique<YcsbZipfianDistribution<key_type>>(lo, hi, theta);
+                                            const key_type &hi, Args... args) {
+    auto key_stream = std::make_unique<YcsbKeyGenerator<key_type, D, Args...>>(
+        lo, hi, args...);
     auto op_stream = std::make_unique<WeightedStream<op_type>>(
         std::vector<uint32_t>({50, 0, 50, 0}));
     return YcsbAStream::Create(
@@ -162,10 +155,9 @@ class YcsbStreamFactory : public Stream<T> {
   }
 
   static std::unique_ptr<YcsbBStream> YcsbB(const key_type &lo,
-                                            const key_type &hi,
-                                            double theta = kDefaultTheta) {
-    auto key_stream =
-        std::make_unique<YcsbZipfianDistribution<key_type>>(lo, hi, theta);
+                                            const key_type &hi, Args... args) {
+    auto key_stream = std::make_unique<YcsbKeyGenerator<key_type, D, Args...>>(
+        lo, hi, args...);
     auto op_stream = std::make_unique<WeightedStream<op_type>>(
         std::vector<uint32_t>({95, 0, 5, 0}));
     return YcsbBStream::Create(
@@ -181,10 +173,9 @@ class YcsbStreamFactory : public Stream<T> {
   }
 
   static std::unique_ptr<YcsbCStream> YcsbC(const key_type &lo,
-                                            const key_type &hi,
-                                            double theta = kDefaultTheta) {
-    auto key_stream =
-        std::make_unique<YcsbZipfianDistribution<key_type>>(lo, hi, theta);
+                                            const key_type &hi, Args... args) {
+    auto key_stream = std::make_unique<YcsbKeyGenerator<key_type, D, Args...>>(
+        lo, hi, args...);
     return YcsbCStream::Create(
         [](const auto &keys) -> absl::StatusOr<YcsbOp<key_type>> {
           auto k = keys->Next();
@@ -195,10 +186,9 @@ class YcsbStreamFactory : public Stream<T> {
   }
 
   static std::unique_ptr<YcsbDStream> YcsbD(const key_type &lo,
-                                            const key_type &hi,
-                                            double theta = kDefaultTheta) {
-    auto key_stream =
-        std::make_unique<YcsbZipfianDistribution<key_type>>(lo, hi, theta);
+                                            const key_type &hi, Args... args) {
+    auto key_stream = std::make_unique<YcsbKeyGenerator<key_type, D, Args...>>(
+        lo, hi, args...);
     auto latest_key_stream =
         std::make_unique<LatestStream<key_type, 10000>>(std::move(key_stream));
     auto op_stream = std::make_unique<WeightedStream<op_type>>(
@@ -220,11 +210,11 @@ class YcsbStreamFactory : public Stream<T> {
 
   static std::unique_ptr<YcsbEStream> YcsbE(const key_type &lo,
                                             const key_type &hi,
-                                            double theta = kDefaultTheta,
                                             int min_rq_size = 0,
-                                            int max_rq_size = 100) {
-    auto key_stream =
-        std::make_unique<YcsbZipfianDistribution<key_type>>(lo, hi, theta);
+                                            int max_rq_size = 100,
+                                            Args... args) {
+    auto key_stream = std::make_unique<YcsbKeyGenerator<key_type, D, Args...>>(
+        lo, hi, args...);
     auto op_stream = std::make_unique<WeightedStream<op_type>>(
         std::vector<uint32_t>({0, 5, 0, 95}));
     auto range_stream =
@@ -245,11 +235,11 @@ class YcsbStreamFactory : public Stream<T> {
 
   class YcsbRmwStream : public Stream<YcsbOp<key_type>> {
    public:
-    YcsbRmwStream(const key_type &lo, const key_type &hi,
-                  double theta = kDefaultTheta)
+    YcsbRmwStream(const key_type &lo, const key_type &hi, Args... args)
         : get_next_(true) {
-      key_stream_ =
-          std::make_unique<YcsbZipfianDistribution<key_type>>(lo, hi, theta);
+      auto key_stream =
+          std::make_unique<YcsbKeyGenerator<key_type, D, Args...>>(lo, hi,
+                                                                   args...);
     }
 
    private:
@@ -262,7 +252,7 @@ class YcsbStreamFactory : public Stream<T> {
           last_key_, !get_next_ ? op_type::kInsert : op_type::kGet, -1};
     }
 
-    std::unique_ptr<YcsbZipfianDistribution<key_type>> key_stream_;
+    std::unique_ptr<YcsbKeyGenerator<key_type, D, Args...>> key_stream_;
     bool get_next_;
     key_type last_key_;
   };
@@ -273,5 +263,9 @@ class YcsbStreamFactory : public Stream<T> {
     return std::make_unique<YcsbRmwStream>(lo, hi, theta);
   }
 };
+
+template <typename T>
+using DefaultYcsbStreamFactory =
+    YcsbStreamFactory<T, rome::zipfian_int_distribution<>, double>;
 
 }  // namespace rome

@@ -31,7 +31,7 @@ class rdma_memory_resource : public util::pmr::memory_resource {
 
  private:
   static constexpr uint8_t kMinSlabClass = 3;
-  static constexpr uint8_t kMaxSlabClass = 12;
+  static constexpr uint8_t kMaxSlabClass = 20;
   static constexpr uint8_t kNumSlabClasses = kMaxSlabClass - kMinSlabClass + 1;
   static constexpr size_t kMaxAlignment = 1 << 8;
   static constexpr char kLogTable[256] = {

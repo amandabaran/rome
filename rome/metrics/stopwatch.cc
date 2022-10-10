@@ -15,13 +15,6 @@ namespace rome::metrics {
 
 namespace {
 
-// All of these are KHz
-constexpr char kTscFreqKhzFilePath[] =
-    "/sys/devices/system/cpu/cpu0/tsc_freq_khz";
-constexpr char kMaxFreqFilePath[] =
-    "/sys/devices/system/cpu/cpu0/cpufreq/base_frequency";
-constexpr int kDefaultCpuFreqKhz = 2300000;
-
 inline uint64_t RdtscpAcquire() {
   uint32_t lo, hi;
   asm volatile(
@@ -58,13 +51,13 @@ Stopwatch::Stopwatch(std::string_view name, uint64_t tsc_freq_khz)
   std::ifstream file;
   file.open(kTscFreqKhzFilePath);
   if (file.is_open()) {
-    ROME_INFO("Loading tsc_freq from tsc_freq_khz");
+    ROME_TRACE("Loading tsc_freq from tsc_freq_khz");
     file >> tsc_freq_khz;
   } else {
     file.clear();
     file.open(kMaxFreqFilePath);
     if (file.is_open()) {
-      ROME_INFO("Loading tsc_freq from max_cpu_freq");
+      ROME_TRACE("Loading tsc_freq from max_cpu_freq");
       file >> tsc_freq_khz;
     } else {
       ROME_WARN(
@@ -74,7 +67,7 @@ Stopwatch::Stopwatch(std::string_view name, uint64_t tsc_freq_khz)
       tsc_freq_khz = kDefaultCpuFreqKhz;
     }
   }
-  ROME_INFO("Using tsc_freq: {}", tsc_freq_khz);
+  ROME_DEBUG("Using tsc_freq: {}", tsc_freq_khz);
   return std::unique_ptr<Stopwatch>(new Stopwatch(name, tsc_freq_khz));
 }
 

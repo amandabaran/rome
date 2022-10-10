@@ -129,8 +129,8 @@ void ConnectionManager<ChannelType>::OnConnectRequest(rdma_cm_id* id,
     if (!Acquire(peer_id)) {
       ROME_DEBUG("Lock acquisition failed: {}", mu_);
       rdma_reject(event->id, nullptr, 0);
-      rdma_ack_cm_event(event);
       rdma_destroy_ep(id);
+      rdma_ack_cm_event(event);
       return;
     }
 
@@ -138,8 +138,8 @@ void ConnectionManager<ChannelType>::OnConnectRequest(rdma_cm_id* id,
     if (auto conn = established_.find(peer_id);
         conn != established_.end() || requested_.contains(peer_id)) {
       rdma_reject(event->id, nullptr, 0);
-      rdma_ack_cm_event(event);
       rdma_destroy_ep(id);
+      rdma_ack_cm_event(event);
       if (peer_id != my_id_) Release();
       auto status =
           util::AlreadyExistsErrorBuilder()
@@ -152,6 +152,7 @@ void ConnectionManager<ChannelType>::OnConnectRequest(rdma_cm_id* id,
 
     // Create a new QP for the connection.
     ibv_qp_init_attr init_attr = DefaultQpInitAttr();
+    ROME_ASSERT(id->qp == nullptr, "QP already allocated...?");
     RDMA_CM_ASSERT(rdma_create_qp, id, pd(), &init_attr);
   } else {
     // rdma_destroy_id(id);
@@ -217,6 +218,7 @@ template <typename ChannelType>
 absl::StatusOr<typename ConnectionManager<ChannelType>::conn_type*>
 ConnectionManager<ChannelType>::ConnectLoopback(rdma_cm_id* id) {
   ROME_ASSERT_DEBUG(id->qp != nullptr, "No QP associated with endpoint");
+  ROME_DEBUG("Connecting loopback...");
   ibv_qp_attr attr;
   int attr_mask;
 
@@ -225,6 +227,7 @@ ConnectionManager<ChannelType>::ConnectLoopback(rdma_cm_id* id) {
   attr.port_num = id->port_num;
   attr_mask =
       IBV_QP_STATE | IBV_QP_PKEY_INDEX | IBV_QP_PORT | IBV_QP_ACCESS_FLAGS;
+  ROME_TRACE("Loopback: IBV_QPS_INIT");
   RDMA_CM_CHECK(ibv_modify_qp, id->qp, &attr, attr_mask);
 
   ibv_port_attr port_attr;
@@ -236,11 +239,13 @@ ConnectionManager<ChannelType>::ConnectLoopback(rdma_cm_id* id) {
   attr_mask =
       (IBV_QP_STATE | IBV_QP_AV | IBV_QP_PATH_MTU | IBV_QP_DEST_QPN |
        IBV_QP_RQ_PSN | IBV_QP_MAX_DEST_RD_ATOMIC | IBV_QP_MIN_RNR_TIMER);
+  ROME_TRACE("Loopback: IBV_QPS_RTR");
   RDMA_CM_CHECK(ibv_modify_qp, id->qp, &attr, attr_mask);
 
   attr.qp_state = IBV_QPS_RTS;
   attr_mask = (IBV_QP_STATE | IBV_QP_SQ_PSN | IBV_QP_TIMEOUT |
                IBV_QP_RETRY_CNT | IBV_QP_RNR_RETRY | IBV_QP_MAX_QP_RD_ATOMIC);
+  ROME_TRACE("Loopback: IBV_QPS_RTS");
   RDMA_CM_CHECK(ibv_modify_qp, id->qp, &attr, attr_mask);
 
   RDMA_CM_CHECK(fcntl, id->recv_cq->channel->fd, F_SETFL,

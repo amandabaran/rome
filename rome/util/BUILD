@@ -122,3 +122,9 @@ cc_library(
     hdrs = ["thread_util.h"],
     deps = [],
 )
+
+cc_library(
+    name = "timing_util",
+    hdrs = ["timing_util.h"],
+    deps = [],
+)
