@@ -1,5 +1,2 @@
 rome/
-romekv/
-tsc_freq_khz/
-qplock/
-masstree-beta/
+alock/

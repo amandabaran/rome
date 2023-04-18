@@ -139,7 +139,8 @@ absl::Status MemoryPool::Init(uint32_t capacity,
     auto connected = connection_manager_->Connect(p.id, p.address, p.port);
     while (absl::IsUnavailable(connected.status())) {
       connected = connection_manager_->Connect(p.id, p.address, p.port);
-    }
+    } 
+    // TODO: this is the line giving the error when we try to use loopback
     ROME_CHECK_OK(ROME_RETURN(connected.status()), connected);
   }
 
