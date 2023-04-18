@@ -59,7 +59,7 @@ common_linker_flags = [
 clang_compile_flags = [
     # "-Werror",
     "-stdlib=libc++",
-    "-fcoroutines-ts",
+    # "-fcoroutines-ts",
 ]
 
 gcc_compile_flags = [
@@ -71,7 +71,7 @@ def _clang_impl(ctx):
     tool_paths = [
         tool_path(
             name = "gcc",
-            path = "/usr/bin/clang",
+            path = "/usr/bin/clang-12",
         ),
         tool_path(
             name = "ld",
@@ -182,7 +182,8 @@ def _clang_impl(ctx):
         ctx = ctx,
         features = features,
         cxx_builtin_include_directories = [
-            "/usr/lib/llvm-12/lib/clang/12.0.0/include",
+            # changing below to 12.0.1 makes it build on luigi, but not cloudlab ...
+            "/usr/lib/llvm-12/lib/clang/12.0.0/include", 
             "/usr/lib/llvm-12/include",
             "/usr/include",
         ],
