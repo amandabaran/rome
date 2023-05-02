@@ -25,6 +25,8 @@
 #include "rome/util/coroutine.h"
 #include "rome/util/status_util.h"
 
+#define LOOPBACK_PORT_NUM 1
+
 namespace rome::rdma {
 
 using ::util::InternalErrorBuilder;
@@ -224,18 +226,18 @@ ConnectionManager<ChannelType>::ConnectLoopback(rdma_cm_id* id) {
 
   attr = DefaultQpAttr();
   attr.qp_state = IBV_QPS_INIT;
-  attr.port_num = id->port_num;
+  attr.port_num = LOOPBACK_PORT_NUM; // id->port_num;
   attr_mask =
       IBV_QP_STATE | IBV_QP_PKEY_INDEX | IBV_QP_PORT | IBV_QP_ACCESS_FLAGS;
   ROME_TRACE("Loopback: IBV_QPS_INIT");
   RDMA_CM_CHECK(ibv_modify_qp, id->qp, &attr, attr_mask);
 
   ibv_port_attr port_attr;
-  RDMA_CM_CHECK(ibv_query_port, id->verbs, id->port_num, &port_attr);
+  RDMA_CM_CHECK(ibv_query_port, id->verbs, LOOPBACK_PORT_NUM, &port_attr); // RDMA_CM_CHECK(ibv_query_port, id->verbs, id->port_num, &port_attr);
   attr.ah_attr.dlid = port_attr.lid;
   attr.qp_state = IBV_QPS_RTR;
   attr.dest_qp_num = id->qp->qp_num;
-  attr.ah_attr.port_num = id->port_num;
+  attr.ah_attr.port_num = LOOPBACK_PORT_NUM; // id->port_num;
   attr_mask =
       (IBV_QP_STATE | IBV_QP_AV | IBV_QP_PATH_MTU | IBV_QP_DEST_QPN |
        IBV_QP_RQ_PSN | IBV_QP_MAX_DEST_RD_ATOMIC | IBV_QP_MIN_RNR_TIMER);
