@@ -1,0 +1,14 @@
+Configuration:
+[common]
+id_file=home/reilly/.ssh/id_ed25519
+log_dir=home/reilly/romekv/logs
+ssh=ssh -i home/reilly/.ssh/id_ed25519 -o StrictHostKeyChecking=no
+
+[sync]
+exclude_file=rome/scripts/exclude.txt
+include_file=rome/scripts/include.txt
+
+rsync -r -e 'ssh -i home/reilly/.ssh/id_ed25519 -o StrictHostKeyChecking=no' --exclude-from=/home/reilly/romekv/rome/scripts/exclude.txt --files-from=/home/reilly/romekv/rome/scripts/include.txt --progress -uva /home/reilly/romekv/ rdy221@apt081.apt.emulab.net:/users/rdy221/romekv
+
+Warning: Identity file home/reilly/.ssh/id_ed25519 not accessible: No such file or directory.
+rsync error: received SIGINT, SIGTERM, or SIGHUP (code 20) at rsync.c(703) [sender=3.2.3]

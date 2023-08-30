@@ -24,7 +24,7 @@ namespace {
 // implemented for Linux-based operating systems.
 absl::StatusOr<int> GetNumHugepages(std::string_view path) {
   // Try to open file.
-  std::ifstream file(path);
+  std::ifstream file(std::string{path});
   if (!file.is_open()) {
     return UnknownErrorBuilder() << "Failed to open file: " << path;
   }
