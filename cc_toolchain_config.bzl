@@ -182,8 +182,9 @@ def _clang_impl(ctx):
         ctx = ctx,
         features = features,
         cxx_builtin_include_directories = [
-            # changing below to 12.0.1 makes it build on luigi, but not cloudlab ...
-            "/usr/lib/llvm-12/lib/clang/12.0.0/include", 
+            # changing below to 12.0.1 makes it build on luigi, but not cloudlab ... 
+            #Well, now, 12.0.1 works on cloudlab but not 12.0.0 lol
+            "/usr/lib/llvm-12/lib/clang/12.0.1/include", 
             "/usr/lib/llvm-12/include",
             "/usr/include",
         ],

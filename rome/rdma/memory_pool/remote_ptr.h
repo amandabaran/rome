@@ -57,6 +57,9 @@ class remote_ptr {
             std::enable_if_t<!std::is_same_v<_T, nullptr_type>>>
   void operator=(const remote_nullptr_t &n) volatile;
 
+  // Decrement operator
+  remote_ptr &operator-=(size_t s);
+
   // Increment operator
   remote_ptr &operator+=(size_t s);
   remote_ptr &operator++();

@@ -54,5 +54,14 @@ TEST(RemotePtrTest, IncrementTest) {
   EXPECT_EQ(p.address(), r.address());
 }
 
+TEST(RemotePtrTest, DecrementT) {
+  remote_ptr<int> p;
+  p = remote_ptr<int>(4, (uint64_t)400);
+
+  auto r = (p -= 4);
+  EXPECT_EQ(r.address(), 399 * sizeof(int));
+  EXPECT_EQ(p.address(), r.address());
+}
+
 }  // namespace
 }  // namespace rome::rdma

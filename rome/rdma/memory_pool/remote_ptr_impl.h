@@ -16,6 +16,13 @@ void remote_ptr<T>::operator=(const remote_nullptr_t& n) volatile {
 }
 
 template <typename T>
+remote_ptr<T>& remote_ptr<T>::operator-=(size_t s) {
+  const auto address = (raw_ - (sizeof(element_type) * s)) & kAddressBitmask;
+  raw_ = (raw_ & kIdBitmask) | address;
+  return *this;
+}
+
+template <typename T>
 remote_ptr<T>& remote_ptr<T>::operator+=(size_t s) {
   const auto address = (raw_ + (sizeof(element_type) * s)) & kAddressBitmask;
   raw_ = (raw_ & kIdBitmask) | address;

@@ -126,6 +126,7 @@ MemoryPool::MemoryPool(
 
 absl::Status MemoryPool::Init(uint32_t capacity,
                               const std::vector<Peer> &peers) {
+  //! I think i need to pass in a different Peer when creating the memory pool , the node ids cant be the same....                       
   auto status = connection_manager_->Start(self_.address, self_.port);
   ROME_CHECK_OK(ROME_RETURN(status), status);
   rdma_memory_ = std::make_unique<rdma_memory_resource>(
