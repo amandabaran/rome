@@ -226,7 +226,7 @@ ConnectionManager<ChannelType>::ConnectLoopback(rdma_cm_id* id) {
 
   attr = DefaultQpAttr();
   attr.qp_state = IBV_QPS_INIT;
-  attr.port_num = = LOOPBACK_PORT_NUM; // id->port_num;
+  attr.port_num = LOOPBACK_PORT_NUM; // id->port_num;
   attr_mask =
       IBV_QP_STATE | IBV_QP_PKEY_INDEX | IBV_QP_PORT | IBV_QP_ACCESS_FLAGS;
   ROME_TRACE("Loopback: IBV_QPS_INIT");
@@ -242,6 +242,7 @@ ConnectionManager<ChannelType>::ConnectLoopback(rdma_cm_id* id) {
       (IBV_QP_STATE | IBV_QP_AV | IBV_QP_PATH_MTU | IBV_QP_DEST_QPN |
        IBV_QP_RQ_PSN | IBV_QP_MAX_DEST_RD_ATOMIC | IBV_QP_MIN_RNR_TIMER);
   ROME_TRACE("Loopback: IBV_QPS_RTR");
+  //TODO: THIS IS THE FUNCTION THROWING THE ERROR
   RDMA_CM_CHECK(ibv_modify_qp, id->qp, &attr, attr_mask);
 
   attr.qp_state = IBV_QPS_RTS;
@@ -269,9 +270,6 @@ absl::StatusOr<typename ConnectionManager<ChannelType>::conn_type*>
 ConnectionManager<ChannelType>::Connect(uint32_t peer_id,
                                         std::string_view server,
                                         uint16_t port) {
-  ROME_DEBUG("MY ID IS {}", my_id_);
-  ROME_DEBUG("PEER ID IS {}", peer_id);                                     
-                                        
   if (Acquire(my_id_)) {
     auto conn = established_.find(peer_id);
     if (conn != established_.end()) {
