@@ -140,7 +140,6 @@ absl::Status MemoryPool::Init(uint32_t capacity,
     while (absl::IsUnavailable(connected.status())) {
       connected = connection_manager_->Connect(p.id, p.address, p.port);
     } 
-    // TODO: this is the line giving the error when we try to use loopback
     ROME_CHECK_OK(ROME_RETURN(connected.status()), connected);
   }
 
@@ -361,11 +360,6 @@ template <typename T>
 T MemoryPool::CompareAndSwap(remote_ptr<T> ptr, uint64_t expected,
                              uint64_t swap) {
   static_assert(sizeof(T) == 8);
-  try {
-    auto info = conn_info_.at(ptr.id());
-  } catch (std::exception &e){
-    std::cout << "EXCEPTION IN CONN INFO MAP" << std::endl;
-  }
   auto info = conn_info_.at(ptr.id());
   
   ibv_sge sge{};

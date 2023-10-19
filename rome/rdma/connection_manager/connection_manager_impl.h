@@ -25,7 +25,7 @@
 #include "rome/util/coroutine.h"
 #include "rome/util/status_util.h"
 
-#define LOOPBACK_PORT_NUM 1
+#define LOOPBACK_PORT_NUM 0
 namespace rome::rdma {
 
 using ::util::InternalErrorBuilder;
@@ -242,7 +242,6 @@ ConnectionManager<ChannelType>::ConnectLoopback(rdma_cm_id* id) {
       (IBV_QP_STATE | IBV_QP_AV | IBV_QP_PATH_MTU | IBV_QP_DEST_QPN |
        IBV_QP_RQ_PSN | IBV_QP_MAX_DEST_RD_ATOMIC | IBV_QP_MIN_RNR_TIMER);
   ROME_TRACE("Loopback: IBV_QPS_RTR");
-  //TODO: THIS IS THE FUNCTION THROWING THE ERROR
   RDMA_CM_CHECK(ibv_modify_qp, id->qp, &attr, attr_mask);
 
   attr.qp_state = IBV_QPS_RTS;
