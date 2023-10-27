@@ -25,7 +25,8 @@
 #include "rome/util/coroutine.h"
 #include "rome/util/status_util.h"
 
-#define LOOPBACK_PORT_NUM 0
+// setting to 1 works on r320 only
+#define LOOPBACK_PORT_NUM 1
 namespace rome::rdma {
 
 using ::util::InternalErrorBuilder;
