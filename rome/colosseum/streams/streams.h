@@ -157,5 +157,30 @@ class NoOpStream : public Stream<NoOp> {
   absl::StatusOr<NoOp> NextInternal() { return NoOp{}; }
 };
 
+template <typename T>
+class EndlessStream : public Stream<T> {
+  public:
+    EndlessStream(std::function<T(void)> generator) : generator_(generator) {}
+  private:
+    std::function<T(void)> generator_;
+    inline absl::StatusOr<T> NextInternal() override { return generator_(); }
+};
+
+template <typename T>
+class PrefilledStream : public Stream<T> {
+  public:
+    PrefilledStream(std::vector<T> vals, int length) : vals_(vals), length_(length), count_(0) {}
+  private:
+    std::vector<T> vals_;
+    int length_;
+    int count_;
+    inline absl::StatusOr<T> NextInternal() override { 
+      count_++;
+      if (length_ < count_) {
+        return StreamTerminatedStatus();
+      }
+      return vals_.at(count_-1);
+    }
+};
 
 }  // namespace rome
