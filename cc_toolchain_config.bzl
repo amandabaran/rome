@@ -37,6 +37,8 @@ common_compile_flags = [
     "-xc++",
     "-Wall",
     "-std=c++20",
+    "-O3",
+    "-Wreorder",
 ]
 
 common_dbg_flags = [
@@ -59,7 +61,7 @@ common_linker_flags = [
 clang_compile_flags = [
     # "-Werror",
     "-stdlib=libc++",
-    # "-fcoroutines-ts",
+    "-fcoroutines-ts",
 ]
 
 gcc_compile_flags = [

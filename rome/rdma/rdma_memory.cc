@@ -1,4 +1,4 @@
-#include "rdma_memory.h"
+#include "rome/rdma/rdma_memory.h"
 
 #include <infiniband/verbs.h>
 #include <sys/mman.h>
@@ -11,7 +11,7 @@
 #include "rome/logging/logging.h"
 #include "rome/util/status_util.h"
 
-namespace rome::rdma {
+namespace rome {
 
 using ::util::AlreadyExistsErrorBuilder;
 using ::util::FailedPreconditionErrorBuilder;
@@ -24,7 +24,7 @@ namespace {
 // implemented for Linux-based operating systems.
 absl::StatusOr<int> GetNumHugepages(std::string_view path) {
   // Try to open file.
-  std::ifstream file(path);
+  std::ifstream file(path.data());
   if (!file.is_open()) {
     return UnknownErrorBuilder() << "Failed to open file: " << path;
   }
@@ -61,7 +61,6 @@ RdmaMemory::RdmaMemory(uint64_t capacity, std::optional<std::string_view> path,
         reinterpret_cast<uint8_t *>(std::aligned_alloc(64, bytes)));
     ROME_ASSERT(std::get<0>(raw_) != nullptr, "Allocation failed.");
   } else {
-    ROME_INFO("Using hugepages");
     raw_ = std::unique_ptr<uint8_t[], mmap_deleter>(reinterpret_cast<uint8_t *>(
         mmap(nullptr, capacity_, PROT_READ | PROT_WRITE,
              MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0)));
@@ -99,12 +98,6 @@ absl::Status RdmaMemory::RegisterMemoryRegion(std::string_view id,
                    [](const auto &raw) { return raw.get(); }, raw_)) +
                offset;
   auto mr = ibv_mr_unique_ptr(ibv_reg_mr(pd, base, length, kDefaultAccess));
-  if (errno == ENOMEM){
-    ROME_DEBUG("Not enough resources to register memory region.");
-  }
-  if (errno == EINVAL){
-    ROME_DEBUG("Invalid access value. Can't register memory region.");
-  }
   ROME_CHECK_QUIET(
       ROME_RETURN(absl::InternalError("Failed to register memory region")),
       mr != nullptr);

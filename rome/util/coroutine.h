@@ -4,22 +4,14 @@
 #include <barrier>
 #include <exception>
 #include <memory>
+#include <coroutine>
 
 #include "absl/status/status.h"
 #include "rome/logging/logging.h"
 #include "rome/util/coroutine.h"
 
-#if defined(__clang__)
-#include <experimental/coroutine>
-namespace util {
-using namespace std::experimental;
-#elif defined(__GNUC__) || defined(__GNUG__)
-#include <coroutine>
 namespace util {
 using namespace std;
-#else
-#error "Unknown compiler"
-#endif
 
 // Forward declaration necessary so that `from_promise()` is defined for our
 // coroutine handle. There may be a cleaner way to accomplish this, but this how
@@ -66,8 +58,6 @@ class Scheduler {
   // Cancels running the coroutines.
   virtual void Cancel() = 0;
 };
-
-using Cancelation = std::atomic<bool>;
 
 template <typename PromiseT>
 class RoundRobinScheduler : public Scheduler<PromiseT> {
@@ -143,8 +133,8 @@ class RoundRobinScheduler : public Scheduler<PromiseT> {
       ;
   }
 
-  const Cancelation& Cancelation() const { return canceled_; }
-
+  const std::atomic<bool>& Cancelation() const { return canceled_; }
+  
  private:
   struct CoroWrapper {
     ~CoroWrapper() { handle.destroy(); }

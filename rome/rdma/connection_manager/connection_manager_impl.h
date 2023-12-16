@@ -10,7 +10,7 @@
 
 #include <atomic>
 #include <chrono>
-#include <experimental/coroutine>
+#include <coroutine>
 #include <memory>
 #include <mutex>
 #include <random>
@@ -227,6 +227,7 @@ ConnectionManager<ChannelType>::ConnectLoopback(rdma_cm_id* id) {
 
   attr = DefaultQpAttr();
   attr.qp_state = IBV_QPS_INIT;
+  ROME_TRACE("id->port_num is {}", id->port_num);
   attr.port_num = LOOPBACK_PORT_NUM; // id->port_num;
   attr_mask =
       IBV_QP_STATE | IBV_QP_PKEY_INDEX | IBV_QP_PORT | IBV_QP_ACCESS_FLAGS;
