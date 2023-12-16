@@ -40,6 +40,10 @@ class Stopwatch : public Metric {
     uint64_t end_;
   };
 
+  ~Stopwatch() {
+    Stop();
+  }
+
   // Initializes the tsc frequency from either a known file or a compile time
   // variable. Then, starts the stopwatch running by initializing the internal
   // `split_`, which tracks total runtime.
