@@ -177,6 +177,7 @@ class PrefilledStream : public Stream<T> {
     inline absl::StatusOr<T> NextInternal() override { 
       count_++;
       if (length_ < count_) {
+        ROME_WARN("OUT OF OPERATIONS : INCREASED SIZE OF PREFILLED STREAM");
         return StreamTerminatedStatus();
       }
       return vals_.at(count_-1);

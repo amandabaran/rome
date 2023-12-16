@@ -283,7 +283,7 @@ void MemoryPool::Write(remote_ptr<T> ptr, const T &val,
     ROME_DEBUG("Preallocated memory for Write: {} bytes @ 0x{:x}", sizeof(T),
                (uint64_t)local);
   }
-
+  //TODO!!! THIS IS HITTING AND NEVER SHOULD
   ROME_ASSERT((uint64_t)local != ptr.address(), "WTF");
   std::memset(local, 0, sizeof(T));
   *local = val;
